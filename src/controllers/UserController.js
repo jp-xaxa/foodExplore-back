@@ -1,9 +1,90 @@
+const knex = require("../database/knex")
+const { hash, compare } = require("bcryptjs")
+const AppError = require("../utils/AppError.js")
+
 class UsersController {
-  async create(request, response) {}
+  async create(request, response) {
+    const { name, email, password, comparisonPassword } = request.body
 
-  async update(request, response) {}
+    const checkUserExists = await knex("users").where({ email })
 
-  async delete(request, response) {}
+    if (checkUserExists.length > 0) {
+      throw new AppError("Este e-mail já está em uso.")
+    }
+
+    if (password !== comparisonPassword) {
+      throw new AppError("As senhas não são iguais!")
+    }
+
+    const hashedPassword = await hash(password, 8)
+    const verificationToken = crypto.randomBytes(32).toString("hex")
+
+    await knex("users").insert({
+      name,
+      email,
+      password: hashedPassword,
+      verification_token: verificationToken,
+    })
+
+    return response.status(201).json()
+  }
+
+  async update(request, response) {
+    const { name, email, password, old_password } = request.body
+    const user_id = request.user.id
+
+    const user = await knex("users").where("id", user_id).first()
+
+    if (!user) {
+      throw new AppError("Usuário não encontrado.")
+    }
+
+    const userWithUpdatedEmail = await knex("users")
+      .where("email", email)
+      .whereNot("id", user_id)
+      .first()
+
+    if (userWithUpdatedEmail) {
+      throw new AppError("Este e-mail já está em uso.")
+    }
+
+    user.name = name ?? user.name
+    user.email = email ?? user.email
+
+    if (old_password) {
+      if (password && !old_password) {
+        throw new AppError(
+          "Você deve informar a senha antiga para definir a nova senha"
+        )
+      }
+
+      if (password && old_password) {
+        const checkOldPassword = await compare(old_password, user.password)
+
+        if (!checkOldPassword) {
+          throw new AppError("A senha antiga não confere")
+        }
+
+        user.password = await hash(password, 8)
+      }
+
+      if (password === old_password) {
+        throw new AppError("A nova senha é igual à anterior!")
+      }
+    }
+
+    await knex("users").where("id", user_id).update(user)
+
+    return response.status(200).json()
+  }
+
+  async delete(request, response) {
+    const user_id = request.user.id
+
+    await knex("users").where({ id: user_id }).delete()
+
+    return response.json()
+  }
 }
 
 module.exports = UsersController
