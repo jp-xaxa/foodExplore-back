@@ -1,10 +1,10 @@
-const knex = require("../database/knex")
+const knex = require("../database/knex/index.js")
 const { hash, compare } = require("bcryptjs")
 const AppError = require("../utils/AppError.js")
 
 class UsersController {
   async create(request, response) {
-    const { name, email, password, comparisonPassword } = request.body
+    const { name, email, password } = request.body
 
     const checkUserExists = await knex("users").where({ email })
 
@@ -12,18 +12,12 @@ class UsersController {
       throw new AppError("Este e-mail já está em uso.")
     }
 
-    if (password !== comparisonPassword) {
-      throw new AppError("As senhas não são iguais!")
-    }
-
     const hashedPassword = await hash(password, 8)
-    const verificationToken = crypto.randomBytes(32).toString("hex")
 
     await knex("users").insert({
       name,
       email,
       password: hashedPassword,
-      verification_token: verificationToken,
     })
 
     return response.status(201).json()
