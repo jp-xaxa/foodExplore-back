@@ -4,6 +4,7 @@ const uploadConfig = require("../configs/upload")
 
 const ProductController = require("../controllers/ProductController")
 const ProductMediaController = require("../controllers/ProductMediaController")
+const ProductSearchController = require("../controllers/ProductSearchController")
 
 const ensureAuthenticated = require("../middlewares/ensureAuthenticated")
 const verifyUserAuthorization = require("../middlewares/verifyUserAuthorization")
@@ -13,6 +14,7 @@ const upload = multer(uploadConfig.MULTER)
 
 const productController = new ProductController()
 const productMediaController = new ProductMediaController()
+const productSearchController = new ProductSearchController()
 
 productRoutes.use(ensureAuthenticated)
 
@@ -28,6 +30,7 @@ productRoutes.patch(
   productMediaController.update
 )
 productRoutes.get("/", productController.index)
+productRoutes.get("/search", productSearchController.index)
 productRoutes.get("/:id", productController.show)
 productRoutes.put("/:id", productController.update)
 productRoutes.delete("/:id", productController.delete)
