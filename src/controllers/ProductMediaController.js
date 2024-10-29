@@ -7,8 +7,6 @@ class ProductMediaController {
     const { id } = request.params
     const mediaFilename = request.file.filename
 
-    console.log(id, mediaFilename)
-
     const diskStorage = new DiskStorage()
 
     const product = await knex("products").where({ id }).first()
