@@ -1,17 +1,31 @@
 const { Router } = require("express")
 
-const FavoriteProductsController = require("../controllers/FavoriteProductsController")
+const FavoritesProductsController = require("../controllers/FavoritesProductsController")
 
 const ensureAuthenticated = require("../middlewares/ensureAuthenticated")
+const verifyUserAuthorization = require("../middlewares/verifyUserAuthorization")
 
-const favoriteRoutes = Router()
+const favoritesRoutes = Router()
 
-const favoriteProductsController = new FavoriteProductsController()
+const favoritesProductsController = new FavoritesProductsController()
 
-favoriteRoutes.use(ensureAuthenticated)
+favoritesRoutes.use(ensureAuthenticated)
+favoritesRoutes.use(verifyUserAuthorization)
 
-favoriteRoutes.post("/:id", favoriteProductsController.create)
-favoriteRoutes.delete(":id/", favoriteProductsController.delete)
-favoriteRoutes.get("/", favoriteProductsController.index)
+favoritesRoutes.post(
+  "/:id",
+  verifyUserAuthorization("client"),
+  favoritesProductsController.create
+)
+favoritesRoutes.delete(
+  ":id",
+  verifyUserAuthorization("client"),
+  favoritesProductsController.delete
+)
+favoritesRoutes.get(
+  "/",
+  verifyUserAuthorization("client"),
+  favoritesProductsController.index
+)
 
-module.exports = favoriteRoutes
+module.exports = favoritesRoutes

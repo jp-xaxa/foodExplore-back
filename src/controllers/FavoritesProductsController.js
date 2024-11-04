@@ -1,10 +1,11 @@
 const knex = require("../database/knex")
 const AppError = require("../utils/AppError")
 
-class FavoriteProductsController {
+class FavoritesProductsController {
   async create(request, response) {
     const { id } = request.params
     const user_id = request.user.id
+    console.log("Entrou aqui na rota de adicionar favorito")
 
     const checkExistProductFavorite = await knex("favorite_products")
       .where({
@@ -40,7 +41,7 @@ class FavoriteProductsController {
       throw new AppError("Este produto não está na sua lista de favoritos.")
     }
 
-    await knex("users")
+    await knex("favorite_products")
       .where({
         product_id: id,
         user_id,
@@ -62,11 +63,11 @@ class FavoriteProductsController {
     }
 
     const products = await knex("products")
-      .whereIn("id", favoriteProductIds) 
+      .whereIn("id", favoriteProductIds)
       .orderBy("name")
 
     return response.status(200).json(products)
   }
 }
 
-module.exports = FavoriteProductsController
+module.exports = FavoritesProductsController
