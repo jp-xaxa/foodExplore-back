@@ -5,7 +5,6 @@ class FavoritesProductsController {
   async create(request, response) {
     const { id } = request.params
     const user_id = request.user.id
-    console.log("Entrou aqui na rota de adicionar favorito")
 
     const checkExistProductFavorite = await knex("favorite_products")
       .where({
@@ -14,7 +13,7 @@ class FavoritesProductsController {
       })
       .first()
 
-    if (!checkExistProductFavorite) {
+    if (checkExistProductFavorite) {
       throw new AppError("Este produto já está na lista de favoritos.")
     }
 

@@ -10,22 +10,10 @@ const favoritesRoutes = Router()
 const favoritesProductsController = new FavoritesProductsController()
 
 favoritesRoutes.use(ensureAuthenticated)
-favoritesRoutes.use(verifyUserAuthorization)
+favoritesRoutes.use(verifyUserAuthorization("client"))
 
-favoritesRoutes.post(
-  "/:id",
-  verifyUserAuthorization("client"),
-  favoritesProductsController.create
-)
-favoritesRoutes.delete(
-  ":id",
-  verifyUserAuthorization("client"),
-  favoritesProductsController.delete
-)
-favoritesRoutes.get(
-  "/",
-  verifyUserAuthorization("client"),
-  favoritesProductsController.index
-)
+favoritesRoutes.post("/:id", favoritesProductsController.create)
+favoritesRoutes.delete("/:id", favoritesProductsController.delete)
+favoritesRoutes.get("/", favoritesProductsController.index)
 
 module.exports = favoritesRoutes
